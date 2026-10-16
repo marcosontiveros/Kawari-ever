@@ -23,16 +23,10 @@ jobs:
       uses: https://github.com/dtolnay/rust-toolchain@stable
       with:
         targets: "wasm32-unknown-unknown"
-    - uses: actions/cache@v5
-      id: cache-deps
+    - uses: https://github.com/Swatinem/rust-cache@v2
       with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-        key: wasm-${{ env.PROFILE_NAME }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        prefix-key: wasm-${{ env.PROFILE_NAME }}
+        cache-bin: false
     - name: Build
       run: cargo build --package kawari ${{ env.CARGO_PROFILE }} --target=wasm32-unknown-unknown --lib --no-default-features
 
@@ -70,17 +64,10 @@ jobs:
     - if: steps.cache-mdbook.outputs.cache-hit != 'true'
       run: |
         cargo install --git https://github.com/rust-lang/mdBook.git mdbook
-    - uses: actions/cache@v5
-      id: cache-deps
+    - uses: https://github.com/Swatinem/rust-cache@v2
       with:
-        path: |
-          ~/.cargo/bin/
-          !~/.cargo/bin/mdbook
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-        key: ${{ matrix.os_name }}-${{ matrix.target_name }}-${{ env.PROFILE_NAME }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        prefix-key: ${{ matrix.os_name }}-${{ matrix.target_name }}-${{ env.PROFILE_NAME }}
+        cache-bin: false
     - name: Install dependencies
       run: |
         sudo apt-get update
