@@ -1,8 +1,6 @@
 # Patching
 
-We support serving patch files to clients like [Astra](https://xiv.zone/software/astra). We will assume you already have already acquired the patch files and can't point on where to find them.
-
-First, create a folder named "patches" next to the Kawari executables. If you prefer a different location, this can be customized in the config:
+We support serving patch files to clients. First, create a folder named "patches" next to the Kawari executables. If you prefer a different location, this can be customized in the config:
 
 ```yaml
 patch:

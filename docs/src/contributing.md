@@ -27,10 +27,6 @@ Before making a pull request, make sure:
 
 Please ensure your commits are atomic, and has short and concise messaging. This isn't a strict guideline so please don't sweat it, but will help keep our history clean and readable. If you need any pointers on how to do this efficiently, don't be afraid to reach out!
 
-## Updating to new patches
-
-See our dedicated [updating guide](updating.md).
-
 ## Testing local Physis
 
 Sometimes, you need to be able to test changes without committing or

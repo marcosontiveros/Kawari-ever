@@ -26,7 +26,7 @@ Additionally, here are some explicit limitations for contributions in our commun
   
 ## Enforcement
 
-If we find out that you're using Kawari in violation of the guidelines outlined above (intentional or not) we will do the following:
+If we find out that you're using Kawari in violation of the guidelines within our community as outlined above (intentional or not) we will do the following:
 
 1. Warn you about this, and point you to a copy of this policy. We may also end the discussion if needed.
 2. If the warning is not heeded or we find you're now intentionally circumventing us, further moderation may be imposed such as a temporary kick out of a chatroom.

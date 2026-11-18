@@ -1,6 +1,6 @@
 # Extensibility
 
-It's possible to extend Kawari in ways that don't involve touching or forking our code. For example, if you care about a quest or want to customize attack behavior that can't be upstreamed. You can also overlay modded game files if you so desire.
+It's possible to extend Kawari in ways that don't involve modifying its source code. For example, if you care about a quest or want to customize attack behavior that can't be upstreamed. You can also overlay modded game files if you so desire.
 
 ## Additional resources
 

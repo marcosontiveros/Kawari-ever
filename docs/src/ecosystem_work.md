@@ -1,8 +1,8 @@
 # Ecosystem Contributions
 
 Our project tries to be a good steward in the FFXIV open-source community,
-mainly by upstreaming changes to other projects. A non-exhaustive list of
-other projects we contributed to are:
+mainly by upstreaming changes to other projects. For example, we contribute
+to the following projects:
 
 * [FFXIVClientStructs](https://github.com/aers/FFXIVClientStructs)
 * [EXDSchema](https://github.com/xivdev/EXDSchema)

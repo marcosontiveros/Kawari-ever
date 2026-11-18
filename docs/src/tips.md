@@ -1,4 +1,4 @@
-# Tips & Tricks
+# Tips
 
 Kawari can be used to explore and experiment with exploration that would be hard/easily detectable on retail.
 

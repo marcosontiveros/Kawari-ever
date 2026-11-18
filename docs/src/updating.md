@@ -1,6 +1,6 @@
 # Updating
 
-If you're updating Kawari to a new game version, there's a mix of automated and manual steps. Some of these can only be done if you have privileged access to the repository or authorized SSH  keys. The purpose of this page is to ensure all of these steps are at least documented for future maintainers.
+If you're updating Kawari to a new game version, there's a mix of automated and manual steps. Some of these can only be done if you have privileged access to the repository or authorized SSH  keys. The purpose of this page is to ensure all of these steps are documented for future maintainers.
 
 ## Determine the target game version
 
@@ -10,7 +10,7 @@ The first version you'll need is the patch version (e.g. "2026.06.18.0000.0000")
 
 ## Run automated updater
 
-A bunch of previous, tedious work has been automated into a tool called KawariUpdater. You can find said tool [here](https://codeberg.org/redstrate/KawariUpdater). Plugging in your client path and the versions mentioned above, you should have a working (or almost working) Kawari for that version!
+A bunch of previous, tedious work has been automated into a tool called [KawariUpdater](https://codeberg.org/redstrate/KawariUpdater). Plugging in your client path and the versions mentioned above, you should have a working (or almost working) Kawari for that version!
 
 ## Update Icarus (if necessary)
 
@@ -28,10 +28,10 @@ Assuming [you are allowed to do so](acceptable_usage.md) you may open a pull req
 
 ## Create tag
 
-Once the patch update is merged, an authorized contributor will create a tag of the old version on the previous commit. The tag name should be the patch version (e.g. "2026.06.18.0000.0000"). This serves as a useful historical marker.
+Once the patch update is merged, an authorized contributor will create a tag of the old version on the previous commit. The tag name should be the patch version (e.g. "2026.06.18.0000.0000").
 
 ## Update PacketAnalyzer
 
-We host an instance of [Packet Analyzer](https://codeberg.org/redstrate/PacketAnalyzer) at [analyze.xiv.zone](https://analyze.xiv.zone). An authorized contributor must run `cargo update` in the repository, change the `VERSION` variable in `scripts/copy-to-server.sh` and then run `scripts/build-for-web.sh` and `scripts/copy-to-server.sh`. Then in the server's filesystem, modify `versions.json` to add the new patch version (e.g. "2026.06.18.0000.0000").
+We host an instance of [Packet Analyzer](https://codeberg.org/redstrate/PacketAnalyzer) at [analyze.xiv.zone](https://analyze.xiv.zone). An authorized contributor must run `cargo update` in the repository and then run `scripts/build-for-web.sh` and `scripts/copy-to-server.sh`. Then in the server's filesystem, modify `versions.json` and `index.html` to add the new patch version (e.g. "2026.06.18.0000.0000").
 
-After all of the required changes are pushed, create a tag similar to the Kawari step above.
+After all of the required changes are pushed, create a tag for the new version.
