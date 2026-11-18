@@ -1,16 +1,61 @@
-# Scripting Events
+# Event API
 
 We currently support scripting CustomTalk and Quest events with Lua.
 
+## Globals
+
+### `EVENT_ID`
+
+Integer representation of the event ID.
+
+### `BASE_ID`
+
+Only set for Event NPCs and Event Objects, this is their base ID.
+
+### `GAME_DATA`
+
+Access to the `GameData` struct.
+
+### `CONDITION`
+
+Can be set by the script to override the condition set when the event is running. If not set, defaults to `Condition::OccupiedInQuestEvent`.
+
+### `DISABLE_EVENT_POS_ROLLBACK`
+
+Can be set by the script to disable event position rollback. If not set, defaults to `false`.
+
+For certain events, you also have access to some globals set by the client.
+Any available ones are printed to the world server log when starting said event.
+
 ## Functions
 
-You can define the following functions to handle various callbacks:
+### `onEnterTerritory(player)`
+
+Called when the client enters the territory, only used by certain event handlers.
+
+* `player` is the `LuaPlayer` which represents the player.
+
+### `onEnterTrigger(player, arg)`
+
+Called when the client enters a walk-in/walk-outside event trigger.
+
+* `player` is the `LuaPlayer` which represents the player.
+* `arg` is an arbitrary value sent by the client.
 
 ### `onTalk(target, player)`
 
-This is called when a player begins talking with this actor.
+This is called when a player begins talking with the actor.
 
 * `target` is the ID of the actor being spoken to.
+* `player` is the `LuaPlayer` which represents the player.
+
+### `onYield(scene, id, results, player)`
+
+This is called when a scene yields execution.
+
+* `scene` is the scene number.
+* `id` is the arbitrary yield ID.
+* `results` is an array of results returned by the client.
 * `player` is the `LuaPlayer` which represents the player.
 
 ### `onReturn(scene, results, player)`
@@ -21,42 +66,12 @@ This is called when a scene returns.
 * `results` is an array of results returned by the client.
 * `player` is the `LuaPlayer` which represents the player.
 
-### `onYield(scene, id, results, player)`
+### `onNestedEventFinished(type, results, player)`
 
-This is called when a scene yields execution.
+This is called when a nested event finishes.
 
-* `scene` is the scene number.
-* `id` is the yield ID. This has no meaningful value onto itself.
+* `type` is `HandlerType` of the event that finished.
 * `results` is an array of results returned by the client.
 * `player` is the `LuaPlayer` which represents the player.
 
-## `LuaPlayer` methods
 
-Here is a non-exhaustive list of event-related methods on `LuaPlayer`:
-
-### `play_scene(scene, flags, params)`
-
-Starts `scene` given `flags` and a list of `params`.
-
-### `finish_event()`
-
-Forcefully finishes the current event, and either returns control back to the player or the event that nests this one.
-
-### `start_event(id, type, arg)`
-
-Starts another event of `id`, usually paired with `EVENT_TYPE_NEST` as `type` for nesting.
-
-## Debugging
-
-Here's a few things to try if you get stuck:
-
-* Using [Scripter](scripter.md) and other tools to decompile the client's Lua bytecode, which will help understanding the scene flow.
-* Paying attention to the server log, which will inform you when scenes return and yield.
-* [Capturing packets](../packets/intro.md) to see how the scenes flow in-game.
-
-## Maintainability
-
-Please follow these guidelines to the best of your ability, so we can keep event scripts nice and clean:
-
-* Follow the [style guide](style_guide.md).
-* A list of injected variables is printed in the server log when your event starts. Try to use instead of hard-coding globals, as these will be updated automatically by the game.

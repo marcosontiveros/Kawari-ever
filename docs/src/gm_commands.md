@@ -1,4 +1,4 @@
-# GM commands
+# GM Commands
 
 These are commands already built-in into the FFXIV client. Normally only available to "Game Masters", they are also reimplemented in Kawari.
 

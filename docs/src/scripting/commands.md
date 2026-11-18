@@ -1,4 +1,4 @@
-# Scripting Commands
+# Command API
 
 Scripting commands is super easy, and we support scripting GM and debug commands.
 
@@ -49,6 +49,3 @@ Here are some additional or required global variables you can set:
 * If you specify `command_sender` printf commands will automatically be prepended with your prefix.
 * For GM commands, you must set the `required_rank` global variable for permissions management.
 
-## Documentation
-
-If you plan to upstream your new commands to Kawari, please add them to the relevant documentation pages.
