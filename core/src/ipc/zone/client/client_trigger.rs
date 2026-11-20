@@ -372,7 +372,7 @@ pub enum ClientTriggerCommand {
 
     /// When a player interacts with an occupied Placard in a ward.
     #[brw(magic = 1106u32)]
-    RequestHousingOccupiedPlotInfo {
+    RequestEstateProfile {
         /// The zone id of the housing ward.
         zone_id: u32,
         /// 0-based index, so plot number - 1.

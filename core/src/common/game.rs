@@ -1190,7 +1190,7 @@ impl From<u64> for HouseId {
 pub enum EstateType {
     #[default]
     FreeCompanyEstate = 0,
-    PrivateChambers = 1,
+    PersonalChambers = 1,
     PersonalEstate = 2,
     Unknown = 3,
     SharedEstate = 4,

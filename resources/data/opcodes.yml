@@ -695,7 +695,7 @@ ServerZoneIpcType:
   comment: The server informs the client about a letter being sent or deleted.
   opcode: 339
   size: 144
-- name: HousingOccupiedLandInfo
+- name: EstateProfile
   comment: Contains owner information of an occupied housing plot. This packet is sent when clicking a placard of an occupied plot, when clicking an occupied plot in the house list, or when viewing FC estate information.
   opcode: 518
   size: 280

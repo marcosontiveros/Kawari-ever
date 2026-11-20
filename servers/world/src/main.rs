@@ -5,11 +5,11 @@ use std::time::{Instant, SystemTime};
 use axum::Router;
 use axum::routing::get;
 use kawari::common::{
-    BasicServiceAccountData, ClientLanguage, ContainerType, DEBUG_COMMAND_TRIGGER, FestivalId,
-    HandlerId, HandlerType, InstanceContentType, ItemOperationKind, LogMessageType, ObjectId,
-    ObjectTypeId, ObjectTypeKind, PlayerStateFlags1, PlayerStateFlags2, PlayerStateFlags3,
-    Position, QuestSpecialFlags, TAB_SHARED_FATE_COUNT, TerritoryIntendedUse, WarpType,
-    calculate_max_level, in_housing_area,
+    BasicServiceAccountData, ClientLanguage, ContainerType, DEBUG_COMMAND_TRIGGER, EstateType,
+    FestivalId, HandlerId, HandlerType, InstanceContentType, ItemOperationKind, LogMessageType,
+    ObjectId, ObjectTypeId, ObjectTypeKind, PlayerStateFlags1, PlayerStateFlags2,
+    PlayerStateFlags3, Position, QuestSpecialFlags, TAB_SHARED_FATE_COUNT, TerritoryIntendedUse,
+    WarpType, calculate_max_level, in_housing_area,
 };
 
 use kawari::config::get_config;
@@ -21,8 +21,8 @@ use kawari::ipc::chat::ClientChatIpcData;
 use kawari::ipc::zone::{
     ActorControlCategory, CWLSLeaveReason, ClientTriggerTarget, Conditions,
     ContentFinderUserAction, CrossRealmListing, CrossRealmListings, DutyFinderSetting,
-    DutySupportInformation, EventLogMessage, EventType, FurnitureTranslatedForObserver,
-    HousingAppealTag, HousingOccupiedLandInfo, ItemInfo, LinkshellInviteResponse,
+    DutySupportInformation, EstateProfile, EventLogMessage, EventType,
+    FurnitureTranslatedForObserver, HousingAppealTag, ItemInfo, LinkshellInviteResponse,
     MarketBoardHistory, MarketBoardHistoryEntry, MarketBoardItem, OnlineStatus, OnlineStatusMask,
     PlayerSetup, PlotAcquireInfo, SceneFlags, SearchInfo, SocialListRequestType, TrustContent,
     TrustInformation,
@@ -1698,7 +1698,7 @@ async fn process_packet(
                                     plot_index,
                                     ward_index,
                                 }
-                                | ClientTriggerCommand::RequestHousingOccupiedPlotInfo {
+                                | ClientTriggerCommand::RequestEstateProfile {
                                     zone_id,
                                     plot_index,
                                     ward_index,
@@ -1762,23 +1762,20 @@ async fn process_packet(
                                         ];
 
                                         let ipc = ServerZoneIpcSegment::new(
-                                            ServerZoneIpcData::HousingOccupiedLandInfo(
-                                                HousingOccupiedLandInfo {
-                                                    house_icon: 1, // TODO: Don't hardcode this
-                                                    estate_name: house_info.house_name,
-                                                    estate_greeting: house_info.house_greeting,
-                                                    owner_name: if let Some(owner_info) = owner_info
-                                                    {
-                                                        owner_info.name
-                                                    } else {
-                                                        "(Unable to retrieve)".to_string()
-                                                    },
-                                                    owner_id: house_info.owner_id as u64,
-                                                    unk2: 2, // TODO: We know what this field is and need to update it
-                                                    tags: appeal_tags,
-                                                    ..Default::default()
+                                            ServerZoneIpcData::EstateProfile(EstateProfile {
+                                                house_icon: 1, // TODO: Don't hardcode this
+                                                estate_name: house_info.house_name,
+                                                estate_greeting: house_info.house_greeting,
+                                                owner_name: if let Some(owner_info) = owner_info {
+                                                    owner_info.name
+                                                } else {
+                                                    "(Unable to retrieve)".to_string()
                                                 },
-                                            ),
+                                                owner_id: house_info.owner_id as u64,
+                                                estate_type: EstateType::PersonalEstate, // TODO: Don't hardcode this
+                                                tags: appeal_tags,
+                                                ..Default::default()
+                                            }),
                                         );
                                         connection.send_ipc_self(ipc).await;
                                     } else {

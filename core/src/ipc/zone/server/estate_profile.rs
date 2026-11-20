@@ -1,14 +1,14 @@
 use binrw::binrw;
 
 use crate::{
-    common::{HouseId, read_string, write_string},
+    common::{EstateType, HouseId, read_string, write_string},
     ipc::zone::{HousingAppealTag, PlotSize},
 };
 
 /// Represents an occupied housing plot
 #[binrw]
 #[derive(Debug, Default, Clone)]
-pub struct HousingOccupiedLandInfo {
+pub struct EstateProfile {
     pub id: HouseId,
 
     /// Can be either a character ID or an FC ID
@@ -22,8 +22,8 @@ pub struct HousingOccupiedLandInfo {
 
     pub house_size: PlotSize,
 
-    /// This is very likely to be the `AvailabilityType`, but it is always `0` (Unavailable) for occupied plots
-    pub unk2: u8,
+    /// The type of estate.
+    pub estate_type: EstateType,
 
     #[brw(pad_size_to = 21)]
     #[br(count = 21)]

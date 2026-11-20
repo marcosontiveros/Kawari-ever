@@ -129,8 +129,8 @@ pub use housing_interior_furniture::{
     Furniture, FurnitureList, FurnitureTranslatedForObserver, HousingInteriorDetails,
 };
 
-mod housing_occupied_land_info;
-pub use housing_occupied_land_info::HousingOccupiedLandInfo;
+mod estate_profile;
+pub use estate_profile::EstateProfile;
 
 mod plot_acquire_info;
 pub use plot_acquire_info::PlotAcquireInfo;
@@ -609,7 +609,7 @@ pub enum ServerZoneIpcData {
     QuestTracker(QuestTracker),
     HouseList(HouseList),
     HousingWardInfo(HousingWardInfo),
-    HousingOccupiedLandInfo(HousingOccupiedLandInfo),
+    EstateProfile(EstateProfile),
     PlotAcquireInfo(PlotAcquireInfo),
     HousingEstateGreeting(HousingEstateGreeting),
     SupportDeskNotification {
