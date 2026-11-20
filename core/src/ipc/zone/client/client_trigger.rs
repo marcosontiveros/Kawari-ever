@@ -358,7 +358,7 @@ pub enum ClientTriggerCommand {
         page: u32,
     },
 
-    /// When a player interacts with an unoccupied Placard in a ward.
+    /// When a player interacts with any Placard in a ward.
     #[brw(magic = 1105u32)]
     RequestPlotAcquireInfo {
         /// The zone id of the housing ward.
