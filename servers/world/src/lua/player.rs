@@ -590,6 +590,18 @@ impl LuaPlayer {
     fn change_territory_house(&mut self, house_id: u32) {
         self.queued_tasks.push(LuaTask::WarpHouse { house_id });
     }
+
+    fn show_screenimage(&mut self, screen_image: u32) {
+        let ipc =
+            ServerZoneIpcSegment::new(ServerZoneIpcData::ActorControlSelf(ActorControlSelf {
+                category: ActorControlCategory::ShowScreenImage {
+                    screen_image,
+                    target_actor_id: Default::default(), // TODO: Allow a target?
+                },
+            }));
+
+        create_ipc_self(self, ipc, self.player_data.character.actor_id);
+    }
 }
 
 impl UserData for LuaPlayer {
@@ -1043,6 +1055,10 @@ impl UserData for LuaPlayer {
         );
         methods.add_method_mut("change_territory_house", |_, this, house_id: u32| {
             this.change_territory_house(house_id);
+            Ok(())
+        });
+        methods.add_method_mut("show_screenimage", |_, this, id: u32| {
+            this.show_screenimage(id);
             Ok(())
         });
     }
