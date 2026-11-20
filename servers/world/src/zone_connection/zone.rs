@@ -12,7 +12,7 @@ use kawari::{
     constants::OBFUSCATION_ENABLED_MODE,
     ipc::zone::{
         ActorControlCategory, ApartmentBuildingState, Condition, DutyFinderSetting, Furniture,
-        FurnitureList, House, HouseList, ServerZoneIpcData, ServerZoneIpcSegment,
+        FurnitureList, House, HouseList, OwnedHousing, ServerZoneIpcData, ServerZoneIpcSegment,
         UpdateMapMarkersForWardDivision, WardDivision, WardDivisionInfo, WardMapInfo,
         WardMapInfoFlags, ZoneInit, ZoneInitFlags,
     },
@@ -131,9 +131,9 @@ impl ZoneConnection {
 
         // Send owned housing list (unsure where this fits in before ZoneInit?!)
         {
-            let ipc = ServerZoneIpcSegment::new(ServerZoneIpcData::OwnedHousing {
-                unk1: Default::default(),
-                unk2: LandData {
+            let ipc = ServerZoneIpcSegment::new(ServerZoneIpcData::OwnedHousing(OwnedHousing {
+                free_company: Default::default(),
+                personal: LandData {
                     id: HouseId {
                         unit: HouseUnit {
                             apartment_division_plot_index: 0,
@@ -148,9 +148,9 @@ impl ZoneConnection {
                     flags: 3,
                     unk1: 0,
                 },
-                unk3: Default::default(),
-                unk4: Default::default(),
-                unk5: Default::default(),
+                unk1: Default::default(),
+                first_shared: Default::default(),
+                second_shared: Default::default(),
                 apartment: LandData {
                     id: HouseId {
                         unit: HouseUnit {
@@ -166,7 +166,7 @@ impl ZoneConnection {
                     flags: 19,
                     unk1: 0,
                 },
-            });
+            }));
             self.send_ipc_self(ipc).await;
         }
 

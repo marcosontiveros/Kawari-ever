@@ -95,7 +95,7 @@ pub use free_company::FcHierarchy;
 
 mod actor_move;
 use crate::common::{
-    DeepDungeonRoomFlag, HandlerId, LandData, ObjectTypeId, Position, read_packed_position,
+    DeepDungeonRoomFlag, HandlerId, ObjectTypeId, Position, read_packed_position,
     read_quantized_rotation, write_packed_position, write_quantized_rotation,
 };
 use crate::constants::{
@@ -198,6 +198,9 @@ pub use dice_roll_result::ZoneDiceRollResult;
 
 mod event_log_message;
 pub use event_log_message::EventLogMessage;
+
+mod owned_housing;
+pub use owned_housing::OwnedHousing;
 
 use crate::common::{
     CHAR_NAME_MAX_LENGTH, ContainerType, ItemOperationKind, ObjectId, read_bool_from, read_string,
@@ -839,20 +842,7 @@ pub enum ServerZoneIpcData {
         index: u8,
     },
     FurnitureList(FurnitureList),
-    OwnedHousing {
-        #[brw(pad_after = 8)] // believe these are always empty?
-        unk1: LandData,
-        #[brw(pad_after = 8)]
-        unk2: LandData,
-        #[brw(pad_after = 8)]
-        unk3: LandData,
-        unk4: LandData,
-        #[brw(pad_after = 8)]
-        unk5: LandData,
-        /// Your apartment unit.
-        #[brw(pad_after = 8)]
-        apartment: LandData,
-    },
+    OwnedHousing(OwnedHousing),
     UpdateFittingShop {
         /// Corresponds to the DisplayId column in the FittingShopCategoryItem Excel sheet.
         #[brw(pad_after = 8)] // empty
