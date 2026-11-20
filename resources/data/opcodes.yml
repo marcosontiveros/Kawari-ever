@@ -703,6 +703,10 @@ ServerZoneIpcType:
   comment: Contains lottery information of a given housing plot. This packet is sent when clicking the placard of any plot.
   opcode: 455
   size: 40
+- name: PlotPriceInfo
+  comment: Contains pricing info for an unoccupied plot. Sent if a plot is vacant and purchaseable.
+  opcode: 141
+  size: 8
 - name: HousingEstateGreeting
   comment: Contains the greeting text for a specific housing plot. This packet is sent when hovering the greeting text bubble in the house list.
   opcode: 319

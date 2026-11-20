@@ -1498,6 +1498,12 @@ pub enum ServerZoneIpcData {
         fellowships: Vec<FellowshipSearchInfo>,
     },
     UpdateMapMarkersForWardDivision(UpdateMapMarkersForWardDivision),
+    PlotPriceInfo {
+        /// The price of the plot in question.
+        plot_price: u32,
+        /// The next time at which the price will decrease during FCFS purchase periods (deprecated/unused since Endwalker).
+        next_devaluation_timestamp: u32,
+    },
 }
 
 #[cfg(test)]
