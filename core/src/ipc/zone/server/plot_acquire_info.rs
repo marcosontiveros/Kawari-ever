@@ -7,7 +7,7 @@ use crate::ipc::zone::{
 /// Represents a vacant housing plot.
 #[binrw]
 #[derive(Debug, Default, Clone)]
-pub struct HousingVacantLandInfo {
+pub struct PlotAcquireInfo {
     pub purchase_type: PurchaseType,
     pub tenant_type: TenantType,
     pub availability_type: AvailabilityType,
@@ -22,13 +22,14 @@ pub struct HousingVacantLandInfo {
     pub claim_ends_at: u32, // TODO: Is this used for both wins and refunds, or only refunds? For refunds it seems to be the bidding period expiration plus three months.
     /// How many bids were placed during this bidding period.
     pub entry_count: u32,
-    /// The winning bid number.
+    /// The winning bid number, read by the client if lottery_result is BidWon.
     pub winning_bid_number: u32,
-    /// The winning bid number, repeated (why?).
+    /// The winning bid number, repeated (why?). Read by the client if lottery_result is BidLost.
     pub winning_bid_number_again: u32,
-    pub unk1: u32, // TODO: Has data, but not sure what it is yet
-    /// Unknown. Seemingly always 0xFFFFFFFF.
+    /// The amount of gil to be refunded. This is set if lottery_result is BidForfeited or BidLost, or if the plot is being relocated to from another one.
+    pub refund_amount: u32,
+    /// Unknown. Seemingly always 0xFFFFFFFF. Not read by the client.
     pub unk2: u32,
-    /// Unknown. Seemingly always 0xFFFFFFFF.
+    /// Unknown. Seemingly always 0xFFFFFFFF. Not read by the client.
     pub unk3: u32,
 }

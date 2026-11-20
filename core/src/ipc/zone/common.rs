@@ -154,6 +154,8 @@ pub enum PlotLottoResult {
     BidForfeited = 3,
     /// The player lost the bid on this plot.
     BidLost = 4,
+    /// The player failed to claim their plot refund in time.
+    RefundExpired = 5,
 }
 
 /// Represents the availability of a specific plot during the *current* lottery cycle.

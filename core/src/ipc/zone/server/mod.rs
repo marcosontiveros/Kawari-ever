@@ -132,8 +132,8 @@ pub use housing_interior_furniture::{
 mod housing_occupied_land_info;
 pub use housing_occupied_land_info::HousingOccupiedLandInfo;
 
-mod housing_vacant_land_info;
-pub use housing_vacant_land_info::HousingVacantLandInfo;
+mod plot_acquire_info;
+pub use plot_acquire_info::PlotAcquireInfo;
 
 mod housing_estate_greeting;
 pub use housing_estate_greeting::HousingEstateGreeting;
@@ -610,7 +610,7 @@ pub enum ServerZoneIpcData {
     HouseList(HouseList),
     HousingWardInfo(HousingWardInfo),
     HousingOccupiedLandInfo(HousingOccupiedLandInfo),
-    HousingVacantLandInfo(HousingVacantLandInfo),
+    PlotAcquireInfo(PlotAcquireInfo),
     HousingEstateGreeting(HousingEstateGreeting),
     SupportDeskNotification {
         unk1: [u8; 16],

@@ -22,10 +22,10 @@ use kawari::ipc::zone::{
     ActorControlCategory, CWLSLeaveReason, ClientTriggerTarget, Conditions,
     ContentFinderUserAction, CrossRealmListing, CrossRealmListings, DutyFinderSetting,
     DutySupportInformation, EventLogMessage, EventType, FurnitureTranslatedForObserver,
-    HousingAppealTag, HousingOccupiedLandInfo, HousingVacantLandInfo, ItemInfo,
-    LinkshellInviteResponse, MarketBoardHistory, MarketBoardHistoryEntry, MarketBoardItem,
-    OnlineStatus, OnlineStatusMask, PlayerSetup, SceneFlags, SearchInfo, SocialListRequestType,
-    TrustContent, TrustInformation,
+    HousingAppealTag, HousingOccupiedLandInfo, ItemInfo, LinkshellInviteResponse,
+    MarketBoardHistory, MarketBoardHistoryEntry, MarketBoardItem, OnlineStatus, OnlineStatusMask,
+    PlayerSetup, PlotAcquireInfo, SceneFlags, SearchInfo, SocialListRequestType, TrustContent,
+    TrustInformation,
 };
 
 use kawari::ipc::zone::{
@@ -1693,7 +1693,7 @@ async fn process_packet(
                                             .await;
                                     }
                                 }
-                                ClientTriggerCommand::RequestHousingVacantPlotInfo {
+                                ClientTriggerCommand::RequestPlotAcquireInfo {
                                     zone_id,
                                     plot_index,
                                     ward_index,
@@ -1728,11 +1728,9 @@ async fn process_packet(
 
                                     // This is always sent regardless, and since we haven't yet implemented purchases, it's fine for it to be blank.
                                     let ipc = ServerZoneIpcSegment::new(
-                                        ServerZoneIpcData::HousingVacantLandInfo(
-                                            HousingVacantLandInfo {
-                                                ..Default::default()
-                                            },
-                                        ),
+                                        ServerZoneIpcData::PlotAcquireInfo(PlotAcquireInfo {
+                                            ..Default::default()
+                                        }),
                                     );
                                     connection.send_ipc_self(ipc).await;
 
