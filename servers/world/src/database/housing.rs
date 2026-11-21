@@ -185,7 +185,7 @@ impl WorldDatabase {
         let the_id: i64 = u64::from(the_house_id) as i64;
         let the_owner = for_owner_id as i64;
         let the_house = models::House {
-            house_id: the_id as i64,
+            house_id: the_id,
             owner_id: the_owner,
             ..Default::default()
         };
@@ -240,5 +240,52 @@ impl WorldDatabase {
         )
         .execute(&mut self.connection)
         .unwrap();
+    }
+
+    // Modifies a house interior's information, such as its inventories (TODO!), orchestrion song, or details.
+    pub fn modify_interior(
+        &mut self,
+        the_house_id: HouseId,
+        the_details: Option<kawari::ipc::zone::HousingInteriorDetails>,
+        song_id: Option<u32>,
+    ) {
+        use schema::house_interior::dsl::*;
+
+        let the_id: i64 = u64::from(the_house_id) as i64;
+
+        if let Some(the_details) = the_details {
+            diesel::update(house_interior)
+                .filter(house_id.eq(the_id))
+                .set(details.eq(serde_json::to_string(&the_details).unwrap()))
+                .execute(&mut self.connection)
+                .unwrap();
+        }
+
+        if let Some(song_id) = song_id {
+            diesel::update(house_interior)
+                .filter(house_id.eq(the_id))
+                .set(orchestrion_song.eq(song_id as i32))
+                .execute(&mut self.connection)
+                .unwrap();
+        }
+    }
+
+    // Modifies a house exterior's information, such as its inventories (TODO!) or details.
+    pub fn modify_exterior(
+        &mut self,
+        the_house_id: HouseId,
+        the_details: Option<kawari::ipc::zone::HouseExterior>,
+    ) {
+        use schema::house_exterior::dsl::*;
+
+        let the_id: i64 = u64::from(the_house_id) as i64;
+
+        if let Some(the_details) = the_details {
+            diesel::update(house_exterior)
+                .filter(house_id.eq(the_id))
+                .set(details.eq(serde_json::to_string(&the_details).unwrap()))
+                .execute(&mut self.connection)
+                .unwrap();
+        }
     }
 }
