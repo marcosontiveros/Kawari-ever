@@ -169,7 +169,7 @@ jobs:
 
         rsync --recursive kawari-${{ matrix.os_name }}-${{ matrix.target_name }}.zip deploy@ryne.moe:/srv/http/astra-distrib/kawari/
     - name: Upload documentation
-      if: env.CREATE_ARTIFACTS == 'true'
+      if: env.CREATE_ARTIFACTS == 'true' && matrix.target == 'x86_64-unknown-linux-gnu'
       run: |
         cargo doc ${{ env.CARGO_PROFILE }} --no-deps --lib
         rsync --recursive --delete target/doc/ deploy@ryne.moe:/srv/http/kawari-api-docs
