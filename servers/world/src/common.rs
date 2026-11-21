@@ -280,7 +280,7 @@ impl ClientHandle {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ToServer {
     /// A new zone connection has started.
     NewClient(ClientHandle),
@@ -315,11 +315,9 @@ pub enum ToServer {
         u16,
     ),
     /// The player walks through a zone change line or passes through an underwater portal (e.g. in Ruby Sea).
-    EnterZoneJump(ClientId, ObjectId, u32, WarpType, u16),
+    EnterZoneJump(ObjectId, u32, WarpType, u16),
     /// The connection disconnected.
     Disconnected(ClientId, ObjectId),
-    /// A fatal error occured.
-    FatalError(std::io::Error),
     /// Request to perform an action
     ActionRequest(ClientId, ObjectId, ActionRequest),
     /// We want to update our own equip display flags.
@@ -337,7 +335,7 @@ pub enum ToServer {
     /// The player loses an effect.
     LoseEffect(ClientId, ObjectId, u16, u16, ObjectId),
     /// Warp with the specified id.
-    Warp(ClientId, ObjectId, u32),
+    Warp(ObjectId, u32),
     /// Ready to spawn the player (this happens during initrequest)
     ReadySpawnPlayer(ClientId, ObjectId, u16, Position, f32, Option<u8>),
     /// Ready to send the ZoneIn ACS
@@ -347,7 +345,7 @@ pub enum ToServer {
     /// We need to despawn a player's minion, and tell other clients
     ActorDespawnsMinion(ObjectId),
     /// Move the player's actor to the specified pop range.
-    MoveToPopRange(ClientId, ObjectId, u32, bool),
+    MoveToPopRange(ObjectId, u32, bool),
     /// The connection sent a direct message to another client. This needs the sender's actor id too for purposes of `send_ipc_from`.
     TellMessageSent(ObjectId, ObjectId, TellMessage),
     /// The client invited another player to join their party, friend list, or free company.
@@ -394,17 +392,17 @@ pub enum ToServer {
     /// The client returned online and we need to inform other party members.
     PartyMemberReturned(ObjectId, i32, u64),
     /// The client is requesting to join the following content.
-    JoinContent(ClientId, ObjectId, u16, DutyFinderSetting),
+    JoinContent(ObjectId, u16, DutyFinderSetting),
     /// The c lient is requesting to leave their current content, the connection is in charge of keeping track of the old position.
     LeaveContent(ClientId, ObjectId, u16, Position, f32),
     /// Update the global server state of the client's conditions.
     UpdateConditions(ObjectId, Conditions),
     /// (Temporary) Signal to the server to kill this actor.
-    Kill(ClientId, ObjectId),
+    Kill(ObjectId),
     /// Inform the server to update our HP to this value.
-    SetHP(ClientId, ObjectId, u32),
+    SetHP(ObjectId, u32),
     /// Inform the server to update our MP to this value.
-    SetMP(ClientId, ObjectId, u16),
+    SetMP(ObjectId, u16),
     /// The client discovered a new location in this zone.
     NewLocationDiscovered(ClientId, u32, Position, u16),
     /// The client is sharing a strategy board with their party.
@@ -426,7 +424,7 @@ pub enum ToServer {
     /// The client begins fishing.
     Fish(ClientId, ObjectId),
     /// Warp to a specified pop range in a new territory.
-    WarpPopRange(ClientId, ObjectId, u16, u32),
+    WarpPopRange(ObjectId, u16, u32),
     /// Request the global server state to reload its Lua state.
     ReloadScripts,
     /// The client dismounted.
@@ -466,7 +464,7 @@ pub enum ToServer {
     /// The client sends a letter to a friend.
     SendLetterTo(ObjectId),
     /// Teleport to this player.
-    Jump(ClientId, String),
+    Jump(ObjectId, String),
     /// Teleport the player to this one.
     Call(ObjectId, String),
     /// The client places a piece of furniture.
@@ -502,11 +500,11 @@ pub enum ToServer {
     /// For the SpawnBatteNpc custom IPC.
     SpawnBattleNpc(u32),
     /// Warp to a specified pop range in the housing ward.
-    WarpHousingWard(ClientId, ObjectId, u16, u32, u16),
+    WarpHousingWard(ObjectId, u16, u32, u16),
     /// Forcefully change the weather for this player's instance.
     ChangeWeather(ObjectId, u8),
     /// Warp to a house.
-    WarpHouse(ClientId, ObjectId, u32),
+    WarpHouse(ObjectId, u32),
 }
 
 #[derive(Clone, Debug)]

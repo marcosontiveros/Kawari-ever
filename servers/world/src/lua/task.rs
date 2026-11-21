@@ -1,5 +1,5 @@
 use crate::{
-    RemakeMode,
+    RemakeMode, ToServer,
     inventory::{CrystalKind, CurrencyKind},
 };
 use kawari::{
@@ -44,9 +44,6 @@ pub enum LuaTask {
     SetLevel {
         level: u16,
     },
-    ChangeWeather {
-        id: u8,
-    },
     ModifyCurrency {
         id: CurrencyKind,
         amount: i32,
@@ -86,16 +83,6 @@ pub enum LuaTask {
     },
     ToggleMount {
         id: u32,
-    },
-    MoveToPopRange {
-        id: u32,
-        fade_out: bool,
-    },
-    SetHP {
-        hp: u32,
-    },
-    SetMP {
-        mp: u16,
     },
     ToggleGlassesStyle {
         id: u32,
@@ -179,7 +166,6 @@ pub enum LuaTask {
     IncompleteQuest {
         id: u32,
     },
-    Kill,
     AbandonContent,
     SetHomepoint {
         homepoint: u16,
@@ -199,11 +185,6 @@ pub enum LuaTask {
         resume_id: u8,
         params: Vec<u32>,
     },
-    WarpPopRange {
-        territory_id: u16,
-        pop_range_id: u32,
-    },
-    RemoveCooldowns,
     ToggleHowTo {
         value: bool,
         id: u32,
@@ -215,22 +196,9 @@ pub enum LuaTask {
     SetGrandCompanyRank {
         rank: u8,
     },
-    Jump {
-        name: String,
-    },
-    Call {
-        name: String,
-    },
     FinishDyeing,
     SetCustomize {
         customize: CustomizeData,
     },
-    WarpHousingWard {
-        territory_id: u16,
-        pop_range_id: u32,
-        ward: u16,
-    },
-    WarpHouse {
-        house_id: u32,
-    },
+    ToServer(ToServer),
 }

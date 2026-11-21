@@ -5,7 +5,7 @@ use parking_lot::Mutex;
 use physis::savedata::chardat::CustomizeData;
 
 use crate::{
-    GameData, PlayerData, RemakeMode, StatusEffects,
+    GameData, PlayerData, RemakeMode, StatusEffects, ToServer,
     common::adjust_quest_id,
     inventory::{CrystalKind, CurrencyKind},
     zone_connection::BaseParameters,
@@ -178,7 +178,11 @@ impl LuaPlayer {
     }
 
     fn change_weather(&mut self, id: u8) {
-        self.queued_tasks.push(LuaTask::ChangeWeather { id });
+        self.queued_tasks
+            .push(LuaTask::ToServer(ToServer::ChangeWeather(
+                self.player_data.character.actor_id,
+                id,
+            )));
     }
 
     pub fn modify_currency(&mut self, id: CurrencyKind, amount: i32, send_client_update: bool) {
@@ -362,15 +366,25 @@ impl LuaPlayer {
 
     fn move_to_pop_range(&mut self, id: u32, fade_out: bool) {
         self.queued_tasks
-            .push(LuaTask::MoveToPopRange { id, fade_out });
+            .push(LuaTask::ToServer(ToServer::MoveToPopRange(
+                self.player_data.character.actor_id,
+                id,
+                fade_out,
+            )));
     }
 
     fn set_hp(&mut self, hp: u32) {
-        self.queued_tasks.push(LuaTask::SetHP { hp });
+        self.queued_tasks.push(LuaTask::ToServer(ToServer::SetHP(
+            self.player_data.character.actor_id,
+            hp,
+        )));
     }
 
     fn set_mp(&mut self, mp: u16) {
-        self.queued_tasks.push(LuaTask::SetMP { mp });
+        self.queued_tasks.push(LuaTask::ToServer(ToServer::SetMP(
+            self.player_data.character.actor_id,
+            mp,
+        )));
     }
 
     fn start_talk_event(&mut self) {
@@ -449,7 +463,9 @@ impl LuaPlayer {
     }
 
     fn kill(&mut self) {
-        self.queued_tasks.push(LuaTask::Kill {});
+        self.queued_tasks.push(LuaTask::ToServer(ToServer::Kill(
+            self.player_data.character.actor_id,
+        )));
     }
 
     fn set_online_status(&mut self, online_status_id: u8) {
@@ -505,14 +521,19 @@ impl LuaPlayer {
     }
 
     fn change_territory_pop_range(&mut self, territory_id: u16, pop_range_id: u32) {
-        self.queued_tasks.push(LuaTask::WarpPopRange {
-            territory_id,
-            pop_range_id,
-        });
+        self.queued_tasks
+            .push(LuaTask::ToServer(ToServer::WarpPopRange(
+                self.player_data.character.actor_id,
+                territory_id,
+                pop_range_id,
+            )));
     }
 
     fn remove_cooldowns(&mut self) {
-        self.queued_tasks.push(LuaTask::RemoveCooldowns {});
+        self.queued_tasks
+            .push(LuaTask::ToServer(ToServer::RemoveCooldowns(
+                self.player_data.character.actor_id,
+            )));
     }
 
     fn toggle_howto(&mut self, value: bool, id: u32) {
@@ -533,11 +554,17 @@ impl LuaPlayer {
     }
 
     fn jump(&mut self, name: String) {
-        self.queued_tasks.push(LuaTask::Jump { name });
+        self.queued_tasks.push(LuaTask::ToServer(ToServer::Jump(
+            self.player_data.character.actor_id,
+            name,
+        )));
     }
 
     fn call(&mut self, name: String) {
-        self.queued_tasks.push(LuaTask::Call { name });
+        self.queued_tasks.push(LuaTask::ToServer(ToServer::Call(
+            self.player_data.character.actor_id,
+            name,
+        )));
     }
 
     fn finish_dyeing(&mut self) {
@@ -580,15 +607,21 @@ impl LuaPlayer {
     }
 
     fn change_territory_housing_ward(&mut self, territory_id: u16, pop_range_id: u32, ward: u16) {
-        self.queued_tasks.push(LuaTask::WarpHousingWard {
-            territory_id,
-            pop_range_id,
-            ward,
-        });
+        self.queued_tasks
+            .push(LuaTask::ToServer(ToServer::WarpHousingWard(
+                self.player_data.character.actor_id,
+                territory_id,
+                pop_range_id,
+                ward,
+            )));
     }
 
     fn change_territory_house(&mut self, house_id: u32) {
-        self.queued_tasks.push(LuaTask::WarpHouse { house_id });
+        self.queued_tasks
+            .push(LuaTask::ToServer(ToServer::WarpHouse(
+                self.player_data.character.actor_id,
+                house_id,
+            )));
     }
 
     fn show_screenimage(&mut self, screen_image: u32) {

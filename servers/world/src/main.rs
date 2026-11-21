@@ -2164,7 +2164,6 @@ async fn process_packet(
                             connection
                                 .handle
                                 .send(ToServer::EnterZoneJump(
-                                    connection.id,
                                     connection.player_data.character.actor_id,
                                     *exit_box,
                                     WarpType::Normal,
@@ -3558,7 +3557,6 @@ async fn process_packet(
                                     connection
                                         .handle
                                         .send(ToServer::EnterZoneJump(
-                                            connection.id,
                                             connection.player_data.character.actor_id,
                                             *param1,
                                             WarpType::Event,
@@ -3862,10 +3860,7 @@ async fn process_packet(
                             // Signal to the global server to kill us.
                             connection
                                 .handle
-                                .send(ToServer::Kill(
-                                    connection.id,
-                                    connection.player_data.character.actor_id,
-                                ))
+                                .send(ToServer::Kill(connection.player_data.character.actor_id))
                                 .await;
                         }
                         ClientZoneIpcData::DyeInformation(dye_information) => {

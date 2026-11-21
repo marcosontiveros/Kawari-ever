@@ -752,7 +752,6 @@ fn server_logic_tick(
         let mut data = data.lock();
         let mut network = network.lock();
         let lua = lua.lock();
-        let from_id = network.find_by_actor(id).unwrap();
         change_zone_warp_to_pop_range(
             &mut data,
             &mut network,
@@ -761,7 +760,6 @@ fn server_logic_tick(
             zone_id,
             exit_pop_range_id,
             id,
-            from_id,
             WarpType::Event,
             0,
             None,
@@ -949,8 +947,6 @@ pub async fn server_main_loop(
                                 let mut game_data = game_data.lock();
                                 let lua = lua.lock();
 
-                                let from_id = network.find_by_actor(task.from_actor_id).unwrap();
-
                                 change_zone_warp_to_pop_range(
                                     &mut data,
                                     &mut network,
@@ -959,7 +955,6 @@ pub async fn server_main_loop(
                                     *zone_id,
                                     *id,
                                     task.from_actor_id,
-                                    from_id,
                                     WarpType::Normal,
                                     0,
                                     None,
@@ -2076,7 +2071,7 @@ pub async fn server_main_loop(
                                     &mut game_data,
                                     instance,
                                     false,
-                                    from_id,
+                                    from_actor_id,
                                     WarpType::Resurrection,
                                 );
                             }
@@ -2215,7 +2210,6 @@ pub async fn server_main_loop(
                     network.to_remove_chat.push(from_id);
                 }
                 ToServer::JoinContent(
-                    from_id,
                     from_actor_id,
                     content_finder_condition_id,
                     content_settings,
@@ -2235,18 +2229,18 @@ pub async fn server_main_loop(
                         if let Some(party) = network.parties.get(&party_id) {
                             for member in &party.members {
                                 if member.is_valid() && member.is_online() {
-                                    actor_ids.push((member.zone_client_id, member.actor_id));
+                                    actor_ids.push(member.actor_id);
                                 }
                             }
                         }
                     } else {
-                        actor_ids.push((from_id, from_actor_id));
+                        actor_ids.push(from_actor_id);
                     }
 
                     if let Some(zone_id) = zone_id {
                         let mut data = data.lock();
 
-                        for (_, actor_id) in &actor_ids {
+                        for actor_id in &actor_ids {
                             remove_actor_from_instance(&mut data, &mut network, *actor_id);
                         }
 
@@ -2263,7 +2257,7 @@ pub async fn server_main_loop(
                             },
                         );
 
-                        for (client_id, actor_id) in &actor_ids {
+                        for actor_id in &actor_ids {
                             target_instance.insert_empty_actor(*actor_id);
 
                             change_zone_warp_to_entrance(
@@ -2271,7 +2265,7 @@ pub async fn server_main_loop(
                                 &mut game_data,
                                 target_instance,
                                 true,
-                                *client_id,
+                                *actor_id,
                                 WarpType::Normal,
                             );
                         }
@@ -2338,14 +2332,14 @@ pub async fn server_main_loop(
 
                     *conditions = new_conditions;
                 }
-                ToServer::Kill(_from_id, from_actor_id) => {
+                ToServer::Kill(from_actor_id) => {
                     let mut data = data.lock();
                     let Some(instance) = data.find_actor_instance_mut(from_actor_id) else {
                         continue;
                     };
                     kill_actor(network.clone(), instance, from_actor_id)
                 }
-                ToServer::SetHP(_from_id, from_actor_id, hp) => {
+                ToServer::SetHP(from_actor_id, hp) => {
                     let mut data = data.lock();
                     let Some(instance) = data.find_actor_instance_mut(from_actor_id) else {
                         continue;
@@ -2359,7 +2353,7 @@ pub async fn server_main_loop(
 
                     update_actor_hp_mp(network.clone(), instance, from_actor_id);
                 }
-                ToServer::SetMP(_from_id, from_actor_id, mp) => {
+                ToServer::SetMP(from_actor_id, mp) => {
                     let mut data = data.lock();
                     let Some(instance) = data.find_actor_instance_mut(from_actor_id) else {
                         continue;
@@ -2526,18 +2520,14 @@ pub async fn server_main_loop(
                     let lua = lua.lock();
 
                     let actor_id = data.find_actor_by_name(&name);
-                    if let Some(client_id) = network.find_by_actor(actor_id) {
-                        change_zone_to_player(
-                            &mut network,
-                            &mut data,
-                            &mut game_data,
-                            &lua,
-                            client_id,
-                            from_actor_id,
-                        );
-                    } else {
-                        tracing::warn!("Can't find player {name} to call!");
-                    }
+                    change_zone_to_player(
+                        &mut network,
+                        &mut data,
+                        &mut game_data,
+                        &lua,
+                        from_actor_id,
+                        actor_id,
+                    );
                 }
                 ToServer::EquipGlasses(from_actor_id, slot, id) => {
                     let mut data = data.lock();
@@ -2599,7 +2589,6 @@ pub async fn server_main_loop(
                         );
                     }
                 }
-                ToServer::FatalError(err) => return Err(err),
                 _ => {
                     tracing::error!("Received a ToServer message we don't handle yet: {msg:#?}");
                 }

@@ -180,14 +180,6 @@ impl ZoneConnection {
                     self.update_class_info().await;
                     self.send_stats().await; // Needed because stats change based on level.
                 }
-                LuaTask::ChangeWeather { id } => {
-                    self.handle
-                        .send(ToServer::ChangeWeather(
-                            self.player_data.character.actor_id,
-                            *id,
-                        ))
-                        .await;
-                }
                 LuaTask::ModifyCurrency {
                     id,
                     amount,
@@ -387,34 +379,6 @@ impl ZoneConnection {
                     })
                     .await;
                 }
-                LuaTask::MoveToPopRange { id, fade_out } => {
-                    self.handle
-                        .send(ToServer::MoveToPopRange(
-                            self.id,
-                            self.player_data.character.actor_id,
-                            *id,
-                            *fade_out,
-                        ))
-                        .await;
-                }
-                LuaTask::SetHP { hp } => {
-                    self.handle
-                        .send(ToServer::SetHP(
-                            self.id,
-                            self.player_data.character.actor_id,
-                            *hp,
-                        ))
-                        .await;
-                }
-                LuaTask::SetMP { mp } => {
-                    self.handle
-                        .send(ToServer::SetMP(
-                            self.id,
-                            self.player_data.character.actor_id,
-                            *mp,
-                        ))
-                        .await;
-                }
                 LuaTask::ToggleGlassesStyle { id } => {
                     self.toggle_glasses_style(*id).await;
                 }
@@ -602,12 +566,6 @@ impl ZoneConnection {
                         self.incomplete_quest(*id).await;
                     }
                 }
-                LuaTask::Kill => {
-                    // Signal to the global server to kill us.
-                    self.handle
-                        .send(ToServer::Kill(self.id, self.player_data.character.actor_id))
-                        .await;
-                }
                 LuaTask::AbandonContent => {
                     // Signal to the global server to leave this content.
                     self.handle
@@ -726,26 +684,6 @@ impl ZoneConnection {
                         );
                     }
                 }
-                LuaTask::WarpPopRange {
-                    territory_id,
-                    pop_range_id,
-                } => {
-                    self.handle
-                        .send(ToServer::WarpPopRange(
-                            self.id,
-                            self.player_data.character.actor_id,
-                            *territory_id,
-                            *pop_range_id,
-                        ))
-                        .await;
-                }
-                LuaTask::RemoveCooldowns => {
-                    self.handle
-                        .send(ToServer::RemoveCooldowns(
-                            self.player_data.character.actor_id,
-                        ))
-                        .await;
-                }
                 LuaTask::ToggleHowTo { value, id } => {
                     if *value {
                         self.player_data.unlock.seen_active_help.clear(*id);
@@ -763,19 +701,6 @@ impl ZoneConnection {
                 LuaTask::SetGrandCompanyRank { rank } => {
                     self.set_grand_company_rank(*rank);
                     self.send_grand_company_info().await;
-                }
-                LuaTask::Jump { name } => {
-                    self.handle
-                        .send(ToServer::Jump(self.id, name.clone()))
-                        .await;
-                }
-                LuaTask::Call { name } => {
-                    self.handle
-                        .send(ToServer::Call(
-                            self.player_data.character.actor_id,
-                            name.clone(),
-                        ))
-                        .await;
                 }
                 LuaTask::FinishDyeing => {
                     if let Some(dye_information) = &self.dyeing_information {
@@ -808,29 +733,8 @@ impl ZoneConnection {
                     }
                     self.respawn_player(false).await;
                 }
-                LuaTask::WarpHousingWard {
-                    territory_id,
-                    pop_range_id,
-                    ward,
-                } => {
-                    self.handle
-                        .send(ToServer::WarpHousingWard(
-                            self.id,
-                            self.player_data.character.actor_id,
-                            *territory_id,
-                            *pop_range_id,
-                            *ward,
-                        ))
-                        .await;
-                }
-                LuaTask::WarpHouse { house_id } => {
-                    self.handle
-                        .send(ToServer::WarpHouse(
-                            self.id,
-                            self.player_data.character.actor_id,
-                            *house_id,
-                        ))
-                        .await;
+                LuaTask::ToServer(msg) => {
+                    self.handle.send(msg.clone()).await;
                 }
             }
         }

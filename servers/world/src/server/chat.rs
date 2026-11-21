@@ -255,7 +255,6 @@ fn process_debug_commands(
                     zone_id,
                     shortcut_poprange_id,
                     from_actor_id,
-                    from_id,
                     WarpType::Normal,
                     0,
                     None,

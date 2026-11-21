@@ -12,7 +12,7 @@ use physis::{
 };
 
 use crate::{
-    ClientId, FromServer, GameData, InstanceQuery, StatusEffects, TerritoryNameKind, ToServer,
+    FromServer, GameData, InstanceQuery, StatusEffects, TerritoryNameKind, ToServer,
     lua::{KawariLua, LuaZone},
     server::{
         NetworkedActor, WorldServer,
@@ -925,8 +925,7 @@ pub fn change_zone_warp_to_pop_range(
     lua: &KawariLua,
     destination_zone_id: u16,
     destination_instance_id: u32,
-    actor_id: ObjectId,
-    from_id: ClientId,
+    from_actor_id: ObjectId,
     warp_type: WarpType,
     loading_screen_vfx_id: u16,
     query: Option<InstanceQuery>,
@@ -937,7 +936,7 @@ pub fn change_zone_warp_to_pop_range(
         game_data,
         lua,
         destination_zone_id,
-        actor_id,
+        from_actor_id,
         warp_type,
         loading_screen_vfx_id,
         query,
@@ -967,7 +966,7 @@ pub fn change_zone_warp_to_pop_range(
         needs_init_zone,
         exit_position,
         exit_rotation,
-        from_id,
+        from_actor_id,
         warp_type,
     );
 }
@@ -978,7 +977,7 @@ pub fn change_zone_warp_to_entrance(
     game_data: &mut GameData,
     target_instance: &mut Instance,
     needs_init_zone: bool,
-    from_id: ClientId,
+    from_actor_id: ObjectId,
     warp_type: WarpType,
 ) {
     let mut destiation_object = None;
@@ -1029,7 +1028,7 @@ pub fn change_zone_warp_to_entrance(
         needs_init_zone,
         exit_position,
         exit_rotation,
-        from_id,
+        from_actor_id,
         warp_type,
     );
 }
@@ -1040,7 +1039,7 @@ pub fn change_zone_to_player(
     data: &mut WorldServer,
     game_data: &mut GameData,
     lua: &KawariLua,
-    from_id: ClientId,
+    from_actor_id: ObjectId,
     to_actor_id: ObjectId,
 ) {
     let destination_zone_id;
@@ -1051,8 +1050,6 @@ pub fn change_zone_to_player(
 
         destination_zone_id = target_instance.zone.id;
     }
-
-    let from_actor_id = network.clients.get(&from_id).unwrap().0.actor_id;
 
     let (target_instance, needs_init_zone) = begin_change_zone(
         data,
@@ -1076,7 +1073,7 @@ pub fn change_zone_to_player(
         needs_init_zone,
         Some(target_actor.position()),
         Some(target_actor.rotation()),
-        from_id,
+        from_actor_id,
         WarpType::Normal,
     );
 }
@@ -1088,10 +1085,10 @@ fn do_change_zone(
     needs_init_zone: bool,
     exit_position: Option<Position>,
     exit_rotation: Option<f32>,
-    from_id: ClientId,
+    from_actor_id: ObjectId,
     warp_type: WarpType,
 ) {
-    let actor_id = network.clients.get(&from_id).unwrap().0.actor_id;
+    let from_id = network.find_by_actor(from_actor_id).unwrap();
     let state = network.get_state_mut(from_id).unwrap();
 
     if needs_init_zone {
@@ -1120,7 +1117,7 @@ fn do_change_zone(
         }));
         target_instance.insert_task(
             from_id,
-            actor_id,
+            from_actor_id,
             WARP_DELAY,
             QueuedTaskData::PacketSegment { segment },
         );
@@ -1166,7 +1163,7 @@ pub fn handle_zone_messages(
         }
         ToServer::ChangeZone(
             from_id,
-            actor_id,
+            from_actor_id,
             zone_id,
             new_position,
             new_rotation,
@@ -1186,7 +1183,7 @@ pub fn handle_zone_messages(
                 &mut game_data,
                 &lua,
                 *zone_id,
-                *actor_id,
+                *from_actor_id,
                 *warp_type,
                 *loading_screen_vfx_id,
                 None,
@@ -1197,26 +1194,20 @@ pub fn handle_zone_messages(
                 needs_init_zone,
                 *new_position,
                 *new_rotation,
-                *from_id,
+                *from_actor_id,
                 *warp_type,
             );
 
             true
         }
-        ToServer::EnterZoneJump(
-            from_id,
-            actor_id,
-            exitbox_id,
-            warp_type,
-            loading_screen_vfx_id,
-        ) => {
+        ToServer::EnterZoneJump(from_actor_id, exitbox_id, warp_type, loading_screen_vfx_id) => {
             let mut data = data.lock();
             let mut network = network.lock();
 
             // first, find the zone jump in the current zone
             let mut destination_zone_id;
             let destination_instance_id;
-            if let Some(current_instance) = data.find_actor_instance(*actor_id) {
+            if let Some(current_instance) = data.find_actor_instance(*from_actor_id) {
                 let Some((_, new_exit_box)) = current_instance.zone.find_exit_box(*exitbox_id)
                 else {
                     tracing::warn!("Couldn't find exit box {exitbox_id}?!");
@@ -1234,7 +1225,7 @@ pub fn handle_zone_messages(
 
                 destination_instance_id = new_exit_box.destination_instance_id;
             } else {
-                tracing::warn!("Couldn't find the instance for actor {actor_id}?!");
+                tracing::warn!("Couldn't find the instance for actor {from_actor_id}?!");
                 return true;
             }
 
@@ -1247,8 +1238,7 @@ pub fn handle_zone_messages(
                 &lua,
                 destination_zone_id,
                 destination_instance_id,
-                *actor_id,
-                *from_id,
+                *from_actor_id,
                 *warp_type,
                 *loading_screen_vfx_id,
                 None,
@@ -1256,7 +1246,7 @@ pub fn handle_zone_messages(
 
             true
         }
-        ToServer::Warp(from_id, actor_id, warp_id) => {
+        ToServer::Warp(from_actor_id, warp_id) => {
             let mut data = data.lock();
             let mut network = network.lock();
             let mut game_data = game_data.lock();
@@ -1274,8 +1264,7 @@ pub fn handle_zone_messages(
                 &lua,
                 destination_zone_id,
                 destination_instance_id,
-                *actor_id,
-                *from_id,
+                *from_actor_id,
                 WarpType::Normal,
                 0,
                 None,
@@ -1283,7 +1272,7 @@ pub fn handle_zone_messages(
 
             true
         }
-        ToServer::WarpPopRange(from_id, from_actor_id, territory_id, pop_range_id) => {
+        ToServer::WarpPopRange(from_actor_id, territory_id, pop_range_id) => {
             let mut data = data.lock();
             let mut network = network.lock();
             let mut game_data = game_data.lock();
@@ -1297,7 +1286,6 @@ pub fn handle_zone_messages(
                 *territory_id,
                 *pop_range_id,
                 *from_actor_id,
-                *from_id,
                 WarpType::Normal,
                 0,
                 None,
@@ -1386,7 +1374,7 @@ pub fn handle_zone_messages(
 
             true
         }
-        ToServer::MoveToPopRange(from_id, from_actor_id, id, fade_out) => {
+        ToServer::MoveToPopRange(from_actor_id, id, fade_out) => {
             let zone_id;
             {
                 let data = data.lock();
@@ -1409,7 +1397,6 @@ pub fn handle_zone_messages(
                 zone_id,
                 *id,
                 *from_actor_id,
-                *from_id,
                 if *fade_out {
                     WarpType::Normal
                 } else {
@@ -1523,7 +1510,7 @@ pub fn handle_zone_messages(
 
             true
         }
-        ToServer::WarpHousingWard(from_id, from_actor_id, territory_id, pop_range_id, ward) => {
+        ToServer::WarpHousingWard(from_actor_id, territory_id, pop_range_id, ward) => {
             let mut data = data.lock();
             let mut network = network.lock();
             let mut game_data = game_data.lock();
@@ -1537,7 +1524,6 @@ pub fn handle_zone_messages(
                 *territory_id,
                 *pop_range_id,
                 *from_actor_id,
-                *from_id,
                 WarpType::Normal,
                 0,
                 Some(InstanceQuery::Ward { ward: *ward }),
@@ -1569,7 +1555,7 @@ pub fn handle_zone_messages(
 
             true
         }
-        ToServer::WarpHouse(from_id, from_actor_id, _house_id) => {
+        ToServer::WarpHouse(from_actor_id, _house_id) => {
             let mut data = data.lock();
             let mut network = network.lock();
             let mut game_data = game_data.lock();
@@ -1585,7 +1571,6 @@ pub fn handle_zone_messages(
                 zone_id,
                 0,
                 *from_actor_id,
-                *from_id,
                 WarpType::Normal,
                 0,
                 Some(InstanceQuery::House {

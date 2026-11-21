@@ -475,11 +475,7 @@ impl ZoneConnection {
     /// Request to teleport the player to the given `warp_id`, which is an index in the Warp Excel sheet.
     pub async fn warp(&mut self, warp_id: u32) {
         self.handle
-            .send(ToServer::Warp(
-                self.id,
-                self.player_data.character.actor_id,
-                warp_id,
-            ))
+            .send(ToServer::Warp(self.player_data.character.actor_id, warp_id))
             .await;
     }
 
@@ -495,7 +491,6 @@ impl ZoneConnection {
 
         self.handle
             .send(ToServer::WarpPopRange(
-                self.id,
                 self.player_data.character.actor_id,
                 destination_zone_id,
                 destination_instance_id,
@@ -550,7 +545,6 @@ impl ZoneConnection {
 
         self.handle
             .send(ToServer::JoinContent(
-                self.id,
                 self.player_data.character.actor_id,
                 id,
                 settings,
