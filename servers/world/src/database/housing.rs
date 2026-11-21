@@ -215,4 +215,30 @@ impl WorldDatabase {
             .execute(&mut self.connection)
             .unwrap();
     }
+
+    // Removes a house from the database.
+    // TOOD: Eventually, also shared tenants and the ban list
+    pub fn remove_house(&mut self, the_house_id: HouseId, for_owner_id: u64) {
+        use schema::house::dsl::*;
+        use schema::house_exterior::dsl::*;
+        use schema::house_interior::dsl::*;
+
+        let the_id: i64 = u64::from(the_house_id) as i64;
+
+        diesel::delete(house_exterior.filter(schema::house_exterior::house_id.eq(the_id)))
+            .execute(&mut self.connection)
+            .unwrap();
+
+        diesel::delete(house_interior.filter(schema::house_interior::house_id.eq(the_id)))
+            .execute(&mut self.connection)
+            .unwrap();
+
+        diesel::delete(
+            house
+                .filter(schema::house::house_id.eq(the_id))
+                .filter(owner_id.eq(for_owner_id as i64)),
+        )
+        .execute(&mut self.connection)
+        .unwrap();
+    }
 }
