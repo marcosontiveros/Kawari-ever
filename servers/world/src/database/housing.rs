@@ -175,4 +175,44 @@ impl WorldDatabase {
     ) -> Vec<kawari::ipc::zone::Furniture> {
         Vec::new()
     }
+    // Adds a new estate to the database.
+    // TODO: Free companies' estates, later on down the road.
+    pub fn add_house(&mut self, the_house_id: HouseId, for_owner_id: u64) {
+        use schema::house::dsl::*;
+        use schema::house_exterior::dsl::*;
+        use schema::house_interior::dsl::*;
+
+        let the_id: i64 = u64::from(the_house_id) as i64;
+        let the_owner = for_owner_id as i64;
+        let the_house = models::House {
+            house_id: the_id as i64,
+            owner_id: the_owner,
+            ..Default::default()
+        };
+
+        diesel::insert_into(house)
+            .values(the_house)
+            .execute(&mut self.connection)
+            .unwrap();
+
+        let the_exterior = models::HouseExterior {
+            house_id: the_id,
+            ..Default::default()
+        };
+
+        diesel::insert_into(house_exterior)
+            .values(the_exterior)
+            .execute(&mut self.connection)
+            .unwrap();
+
+        let the_interior = models::HouseInterior {
+            house_id: the_id,
+            ..Default::default()
+        };
+
+        diesel::insert_into(house_interior)
+            .values(the_interior)
+            .execute(&mut self.connection)
+            .unwrap();
+    }
 }
