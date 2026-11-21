@@ -1167,16 +1167,16 @@ impl Default for HouseId {
     }
 }
 
-impl From<HouseId> for u64 {
+impl From<HouseId> for i64 {
     fn from(the_id: HouseId) -> Self {
         let mut cursor = Cursor::new(Vec::new());
         the_id.write_le(&mut cursor).unwrap();
-        u64::from_le_bytes(cursor.into_inner().try_into().unwrap_or_default())
+        i64::from_le_bytes(cursor.into_inner().try_into().unwrap_or_default())
     }
 }
 
-impl From<u64> for HouseId {
-    fn from(the_id: u64) -> Self {
+impl From<i64> for HouseId {
+    fn from(the_id: i64) -> Self {
         let mut cursor = Cursor::new(the_id.to_le_bytes());
         HouseId::read_le(&mut cursor).unwrap_or_default()
     }

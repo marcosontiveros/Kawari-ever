@@ -11,10 +11,10 @@ use kawari::common::HousingFlag;
 impl WorldDatabase {
     pub fn find_house(&mut self, the_house_id: HouseId) -> Option<House> {
         use schema::house::dsl::*;
-        let the_id: u64 = the_house_id.into();
+        let the_id = i64::from(the_house_id);
 
         house
-            .filter(house_id.eq(the_id as i64))
+            .filter(house_id.eq(the_id))
             .first::<House>(&mut self.connection)
             .ok()
     }
@@ -35,7 +35,7 @@ impl WorldDatabase {
             .load(&mut self.connection)
         {
             for the_house in the_houses {
-                let the_house_id: HouseId = (the_house.house_id as u64).into();
+                let the_house_id: HouseId = the_house.house_id.into();
 
                 if (the_house_id.territory_type_id == zone_id)
                     && (the_house_id.ward_index as u16 == ward_number)
@@ -89,10 +89,10 @@ impl WorldDatabase {
         the_house_id: HouseId,
     ) -> Option<kawari::ipc::zone::HousingInteriorDetails> {
         use schema::house_interior::dsl::*;
-        let the_id: u64 = the_house_id.into();
+        let the_id = i64::from(the_house_id);
 
         if let Ok(the_interior) = house_interior
-            .filter(house_id.eq(the_id as i64))
+            .filter(house_id.eq(the_id))
             .first::<models::HouseInterior>(&mut self.connection)
         {
             let interior: kawari::ipc::zone::HousingInteriorDetails =
@@ -109,9 +109,9 @@ impl WorldDatabase {
         the_house_id: HouseId,
     ) -> Option<kawari::ipc::zone::HouseExterior> {
         use schema::house_exterior::dsl::*;
-        let the_id: u64 = the_house_id.into();
+        let the_id = i64::from(the_house_id);
         if let Ok(the_exterior) = house_exterior
-            .filter(house_id.eq(the_id as i64))
+            .filter(house_id.eq(the_id))
             .first::<models::HouseExterior>(&mut self.connection)
         {
             let exterior: kawari::ipc::zone::HouseExterior =
@@ -133,12 +133,12 @@ impl WorldDatabase {
         use schema::house_exterior::dsl::*;
         use schema::house_interior::dsl::*;
 
-        let the_id: u64 = the_house_id.into();
+        let the_id = i64::from(the_house_id);
         let mut the_furniture: Vec<kawari::ipc::zone::Furniture> = Vec::new();
 
         if want_interior {
             if let Ok(the_interior) = house_interior
-                .filter(schema::house_interior::dsl::house_id.eq(the_id as i64))
+                .filter(schema::house_interior::dsl::house_id.eq(the_id))
                 .first::<models::HouseInterior>(&mut self.connection)
             {
                 let selected_inventory = if !want_storeroom {
@@ -150,7 +150,7 @@ impl WorldDatabase {
             }
         } else {
             if let Ok(the_exterior) = house_exterior
-                .filter(schema::house_exterior::dsl::house_id.eq(the_id as i64))
+                .filter(schema::house_exterior::dsl::house_id.eq(the_id))
                 .first::<models::HouseExterior>(&mut self.connection)
             {
                 let selected_inventory = if !want_storeroom {
@@ -175,6 +175,7 @@ impl WorldDatabase {
     ) -> Vec<kawari::ipc::zone::Furniture> {
         Vec::new()
     }
+
     // Adds a new estate to the database.
     // TODO: Free companies' estates, later on down the road.
     pub fn add_house(&mut self, the_house_id: HouseId, for_owner_id: u64) {
@@ -182,7 +183,7 @@ impl WorldDatabase {
         use schema::house_exterior::dsl::*;
         use schema::house_interior::dsl::*;
 
-        let the_id: i64 = u64::from(the_house_id) as i64;
+        let the_id = i64::from(the_house_id);
         let the_owner = for_owner_id as i64;
         let the_house = models::House {
             house_id: the_id,
@@ -217,13 +218,13 @@ impl WorldDatabase {
     }
 
     // Removes a house from the database.
-    // TOOD: Eventually, also shared tenants and the ban list
+    // TODO: Eventually, also shared tenants and the ban list
     pub fn remove_house(&mut self, the_house_id: HouseId, for_owner_id: u64) {
         use schema::house::dsl::*;
         use schema::house_exterior::dsl::*;
         use schema::house_interior::dsl::*;
 
-        let the_id: i64 = u64::from(the_house_id) as i64;
+        let the_id = i64::from(the_house_id);
 
         diesel::delete(house_exterior.filter(schema::house_exterior::house_id.eq(the_id)))
             .execute(&mut self.connection)
@@ -251,7 +252,7 @@ impl WorldDatabase {
     ) {
         use schema::house_interior::dsl::*;
 
-        let the_id: i64 = u64::from(the_house_id) as i64;
+        let the_id = i64::from(the_house_id);
 
         if let Some(the_details) = the_details {
             diesel::update(house_interior)
@@ -278,7 +279,7 @@ impl WorldDatabase {
     ) {
         use schema::house_exterior::dsl::*;
 
-        let the_id: i64 = u64::from(the_house_id) as i64;
+        let the_id = i64::from(the_house_id);
 
         if let Some(the_details) = the_details {
             diesel::update(house_exterior)
