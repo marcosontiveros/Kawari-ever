@@ -1212,13 +1212,105 @@ pub enum PlotState {
     OwnedEstate = 3,
 }
 
+/// Used for housing.
+/// Describes what amenities this estate has, along with some extra info (if your chocobo is there, if this place is in a subdivision, and so on).
+#[binrw]
+#[derive(Clone, Copy, Default)]
+pub struct LandFlag(u8);
+
+bitflags! {
+    impl LandFlag: u8 {
+        const ESTATE_HALL_BUILT = 0x1;
+        const TELEPORTABLE = 0x2;
+        const CHOCOBO_IN_STABLE = 0x4;
+        const FC_WORKSHOP_BUILT = 0x8;
+        const IS_IN_SUBDIVISION = 0x10;
+        const SECOND_SHARED_ESTATE = 0x20; // If set, then the Shared Estate to modify is the second one, if not set, then it's the first one.
+        // No more flags after 0x20
+    }
+}
+
+impl std::fmt::Debug for LandFlag {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        if self.0 != 0 {
+            bitflags::parser::to_writer(self, f)
+        } else {
+            write!(f, "NONE")
+        }
+    }
+}
+
+/// Used for housing.
+/// Describes what permissions you have at this shared estate.
+#[binrw]
+#[derive(Clone, Copy, Default)]
+pub struct SharedEstateFlag(u8);
+
+bitflags! {
+    impl SharedEstateFlag: u8 {
+        const UNKNOWN1 = 0x1;
+        const ESTATE_CUSTOMIZATION_FURNITURE = 0x2;
+        const GARDENING_PLANTING = 0x4;
+        const GARDENING_HARVESTING = 0x8;
+        const GARDENING_CROP_DISPOSAL = 0x10;
+        const STABLE_TENDING_CHOCOBOS = 0x20;
+        const ORCHESTRION_OPERATION = 0x40;
+        const MESSAGE_BOOK_MANAGEMENT = 0x80;
+    }
+}
+
+impl std::fmt::Debug for SharedEstateFlag {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        if self.0 != 0 {
+            bitflags::parser::to_writer(self, f)
+        } else {
+            write!(f, "NONE")
+        }
+    }
+}
+
 /// Land data used for housing.
 #[binrw]
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Clone, Copy)]
 pub struct LandData {
     pub id: HouseId,
-    pub flags: u32,
-    pub unk1: u32,
+    pub land_flags: LandFlag,
+    #[brw(pad_after = 2)]
+    pub shared_estate_flags: SharedEstateFlag,
+}
+
+impl Default for LandData {
+    fn default() -> Self {
+        // When there's not a valid estate, the server fills in the HouseId field with all 0xFFs.
+        let id = HouseId::from(-1);
+        Self {
+            id,
+            land_flags: LandFlag::default(),
+            shared_estate_flags: SharedEstateFlag::default(),
+        }
+    }
+}
+
+impl LandData {
+    pub fn is_empty(&self) -> bool {
+        // If the id is -1 (or in other words, 0xFF for every byte), this is is an unused LandData.
+        let id = i64::from(self.id);
+        id == -1
+    }
+}
+
+impl std::fmt::Debug for LandData {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        if self.is_empty() {
+            write!(f, "None")
+        } else {
+            f.debug_struct("LandData")
+                .field("id", &self.id)
+                .field("land_flags", &self.land_flags)
+                .field("shared_estate_flags", &self.shared_estate_flags)
+                .finish()
+        }
+    }
 }
 
 /// For deep dungeon map layouts.

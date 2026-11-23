@@ -3,10 +3,8 @@ use diesel::prelude::*;
 use super::{WorldDatabase, models, schema};
 use crate::GameData;
 use crate::database::House;
-use kawari::common::{HouseId, PlotState, internal_housing_row};
-use kawari::ipc::zone::PlotSize;
-
-use kawari::common::HousingFlag;
+use kawari::common::{HouseId, HousingFlag, LandData, LandFlag, PlotState, internal_housing_row};
+use kawari::ipc::zone::{OwnedHousing, PlotSize};
 
 impl WorldDatabase {
     pub fn find_house(&mut self, the_house_id: HouseId) -> Option<House> {
@@ -288,5 +286,40 @@ impl WorldDatabase {
                 .execute(&mut self.connection)
                 .unwrap();
         }
+    }
+
+    // Returns an OwnedHousing containing properties the given content id owns or has estates shared with.
+    pub fn find_owned_housing(&mut self, for_content_id: u64) -> OwnedHousing {
+        use schema::house::dsl::*;
+
+        let mut owned_housing = OwnedHousing::default();
+
+        if let Ok(the_houses) = house
+            .filter(owner_id.eq(for_content_id as i64))
+            .select(house_id)
+            .load::<i64>(&mut self.connection)
+        {
+            for estate in the_houses {
+                let the_house_id = HouseId::from(estate);
+
+                // TODO: Don't hardcode the LandFlags
+                if the_house_id.unit.apartment_flag {
+                    owned_housing.apartment = LandData {
+                        id: the_house_id,
+                        land_flags: LandFlag::ESTATE_HALL_BUILT | LandFlag::TELEPORTABLE,
+                        ..Default::default()
+                    };
+                } else {
+                    owned_housing.personal = LandData {
+                        id: the_house_id,
+                        land_flags: LandFlag::ESTATE_HALL_BUILT | LandFlag::TELEPORTABLE,
+                        ..Default::default()
+                    };
+                    // TODO: Free company estate, shared estates
+                }
+            }
+        }
+
+        owned_housing
     }
 }
