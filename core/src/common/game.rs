@@ -1153,17 +1153,8 @@ pub struct HouseId {
 
 impl Default for HouseId {
     fn default() -> Self {
-        Self {
-            unit: HouseUnit {
-                apartment_division_plot_index: 127,
-                apartment_flag: false,
-            },
-            unk1: 255,
-            ward_index: 0,
-            room_number: 0,
-            territory_type_id: 0xFFFF,
-            world_id: 0xFFFF,
-        }
+        // When there's not a valid estate, the server fills in the HouseId with all 0xFFs.
+        HouseId::from(-1)
     }
 }
 
@@ -1271,7 +1262,7 @@ impl std::fmt::Debug for SharedEstateFlag {
 
 /// Land data used for housing.
 #[binrw]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct LandData {
     pub id: HouseId,
     pub land_flags: LandFlag,
@@ -1279,21 +1270,9 @@ pub struct LandData {
     pub shared_estate_flags: SharedEstateFlag,
 }
 
-impl Default for LandData {
-    fn default() -> Self {
-        // When there's not a valid estate, the server fills in the HouseId field with all 0xFFs.
-        let id = HouseId::from(-1);
-        Self {
-            id,
-            land_flags: LandFlag::default(),
-            shared_estate_flags: SharedEstateFlag::default(),
-        }
-    }
-}
-
 impl LandData {
     pub fn is_empty(&self) -> bool {
-        // If the id is -1 (or in other words, 0xFF for every byte), this is is an unused LandData.
+        // If the id is -1 (or in other words, 0xFF for every byte), this is an unused LandData.
         let id = i64::from(self.id);
         id == -1
     }
